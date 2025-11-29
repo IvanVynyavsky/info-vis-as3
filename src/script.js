@@ -32,6 +32,8 @@ let tooltip;
 
 // Map chart globals
 let mapSvg, mapGroup, projection, pathGenerator, colorScale;
+const mapMargin = { top: 10, right: 10, bottom: 10, left: 10 };
+let resizeTimer;
 
 // ---------------------------------------------------------------------------//
 // Data loading
@@ -161,39 +163,45 @@ function updateMetricDescription(metric) {
 // ---------------------------------------------------------------------------//
 function initMap() {
   const container = d3.select("#map");
-  const width = 900;
-  const height = 500;
-  const margin = { top: 10, right: 10, bottom: 10, left: 10 };
-  const innerWidth = width - margin.left - margin.right;
-  const innerHeight = height - margin.top - margin.bottom;
+  mapSvg = container.append("svg");
+  mapGroup = mapSvg.append("g");
 
-  mapSvg = container
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
+  updateColorScale();
+  updateLegend();
+  renderMap();
 
-  mapGroup = mapSvg
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+  window.addEventListener("resize", handleResize);
+}
+
+function getMapDimensions() {
+  const containerNode = d3.select("#map").node();
+  const containerWidth = containerNode ? containerNode.getBoundingClientRect().width : 900;
+  const width = Math.max(320, Math.min(containerWidth, 1200));
+  const height = Math.max(320, Math.round(width * 0.55));
+  return { width, height };
+}
+
+function renderMap() {
+  const { width, height } = getMapDimensions();
+  const innerWidth = width - mapMargin.left - mapMargin.right;
+  const innerHeight = height - mapMargin.top - mapMargin.bottom;
+
+  mapSvg.attr("width", width).attr("height", height);
+  mapGroup.attr("transform", `translate(${mapMargin.left},${mapMargin.top})`);
 
   projection = d3.geoAlbersUsa().fitSize([innerWidth, innerHeight], usStates);
   pathGenerator = d3.geoPath().projection(projection);
 
-  updateColorScale();
-  updateLegend();
-
-  mapGroup
+  const states = mapGroup
     .selectAll("path.state")
-    .data(usStates.features)
-    .join("path")
+    .data(usStates.features, (d) => extractStateCode(d));
+
+  states
+    .enter()
+    .append("path")
     .attr("class", "state")
-    .attr("d", pathGenerator)
     .attr("stroke", "#ffffff")
     .attr("stroke-width", 0.7)
-    .attr("fill", (d) => {
-      const code = extractStateCode(d);
-      return colorScale(getMetricValue(code));
-    })
     .on("mouseover", function (event, d) {
       const code = extractStateCode(d);
       const name = extractStateName(d);
@@ -222,18 +230,27 @@ function initMap() {
       mapGroup.selectAll(".state").classed("selected", false);
       d3.select(this).classed("selected", true);
     })
-    .transition()
-    .duration(900)
+    .merge(states)
+    .attr("d", pathGenerator)
     .attr("fill", (d) => {
       const code = extractStateCode(d);
       return colorScale(getMetricValue(code));
     });
+
+  states.exit().remove();
 
   // Highlight default selection if present.
   mapGroup
     .selectAll(".state")
     .filter((d) => extractStateCode(d) === selectedState)
     .classed("selected", true);
+}
+
+function handleResize() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    renderMap();
+  }, 150);
 }
 
 function updateColorScale() {

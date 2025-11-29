@@ -17,11 +17,13 @@
 
     <section class="controls">
       <div id="map-controls">
-        <label for="metric-select">Map metric:</label>
-        <select id="metric-select">
-          <option value="count" selected>Total accidents</option>
-          <option value="severity">Average severity</option>
-        </select>
+        <div class="metric-control">
+          <label for="metric-select">Map metric:</label>
+          <select id="metric-select">
+            <option value="count" selected>Total accidents</option>
+            <option value="severity">Average severity</option>
+          </select>
+        </div>
         <div id="legend">
           <div class="legend-item">
             <span class="legend-label" id="legend-label-low"></span>

@@ -56,8 +56,16 @@ h2 {
 #map-controls {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 18px;
   flex-wrap: wrap;
+}
+
+.metric-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 1 260px;
 }
 
 #map-controls label {
@@ -70,12 +78,16 @@ h2 {
   border: 1px solid var(--border);
   background: #fff;
   font-size: 14px;
+  min-width: 170px;
 }
 
 #legend {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  flex: 1 1 360px;
   font-size: 14px;
   color: var(--muted);
 }
@@ -100,7 +112,8 @@ h2 {
 }
 
 #legend-gradient {
-  width: 180px;
+  flex: 0 1 320px;
+  width: clamp(160px, 40vw, 320px);
   height: 15px;
   border-radius: 8px;
   border: 1px solid var(--border);
@@ -125,6 +138,7 @@ h2 {
 
 #map {
   width: 100%;
+  min-height: 320px;
 }
 
 svg {
@@ -164,6 +178,12 @@ footer {
   font-size: 12px;
 }
 
+@media (max-width: 900px) {
+  .page {
+    padding: 28px 16px 40px;
+  }
+}
+
 @media (max-width: 720px) {
   .card {
     padding: 14px 12px 8px;
@@ -171,5 +191,43 @@ footer {
 
   h1 {
     font-size: 24px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  #legend {
+    justify-content: center;
+  }
+
+  #legend-gradient {
+    max-width: none;
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 540px) {
+  .page {
+    padding: 22px 14px 32px;
+  }
+
+  #map-controls {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  #map-controls select {
+    width: 100%;
+    max-width: 240px;
+  }
+
+  #legend {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .controls {
+    gap: 12px;
   }
 }
